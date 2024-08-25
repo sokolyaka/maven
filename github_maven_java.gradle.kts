@@ -1,6 +1,6 @@
 tasks.register<Jar>("sourcesJar") {
     dependsOn("classes")
-    from(sourceSets["main"].allSource)
+    from(project.the<SourceSetContainer>()["main"].allSource)
 }
 
 tasks.register<Jar>("javadocJar") {
@@ -13,7 +13,11 @@ artifacts {
     add("archives", tasks["javadocJar"])
 }
 
-publishing {
+val publishedGroupId: String by extra
+val publishedArtifactId: String by extra
+val publishedVersion: String by extra
+
+configure<PublishingExtension> {
     publications {
         create<MavenPublication>("maven") {
             groupId = publishedGroupId
@@ -27,6 +31,9 @@ publishing {
     repositories {
         maven {
             name = "GitHubPackages"
+            val GITHUB_USERID :String by extra
+            val REPOSITORY :String by extra
+
             url = uri("https://maven.pkg.github.com/$GITHUB_USERID/$REPOSITORY")
             credentials {
                 username = System.getenv("GPR_USER") ?: project.findProperty("gpr.usr") as String?
